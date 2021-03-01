@@ -4,10 +4,7 @@
 """Retrieve animated artwork for kodi movies"""
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import get_json, DialogSelect, log_msg, ADDON_ID
-else:
-    from utils import get_json, DialogSelect, log_msg, ADDON_ID
+from .utils import get_json, DialogSelect, log_msg, ADDON_ID
 import xbmc
 import xbmcvfs
 import xbmcgui
@@ -24,10 +21,7 @@ class AnimatedArt(object):
         """Initialize - optionaly provide SimpleCache and KodiDb object"""
 
         if not kodidb:
-            if sys.version_info.major == 3:
-                from .kodidb import KodiDb
-            else:
-                from kodidb import KodiDb
+            from .kodidb import KodiDb
             self.kodidb = KodiDb()
         else:
             self.kodidb = kodidb
@@ -77,6 +71,8 @@ class AnimatedArt(object):
         return self.get_art(imdb_id, "fanarts")
 
     def get_art(self, imdb_id, art_type):
+        # Disable this part
+        return []
         """get the artwork"""
         art_db = self.get_animatedart_db()
         if art_db.get(imdb_id):
@@ -189,4 +185,5 @@ class AnimatedArt(object):
                 "movieid": kodi_movie["movieid"],
                 "art": {"animatedfanart": artwork["animatedfanart"], "animatedposter": artwork["animatedposter"]}
             }
-            self.kodidb.set_json('VideoLibrary.SetMovieDetails', params)
+            if not ("art" in kodi_movie and kodi_movie["art"].get("animatedposter") == artwork["animatedposter"] and kodi_movie["art"].get("animatedfanart") == artwork["animatedfanart"]):
+                self.kodidb.set_json('VideoLibrary.SetMovieDetails', params)

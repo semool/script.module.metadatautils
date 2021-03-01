@@ -7,20 +7,24 @@ import os, sys
 import xbmc
 import xbmcgui
 import xbmcvfs
-if sys.version_info.major == 3:
-    from .utils import json, try_encode, log_msg, log_exception, get_clean_image, KODI_VERSION
-    from .utils import try_parse_int, localdate_from_utc_string, localized_date_time
-    from .kodi_constants import *
-else: 
-    from utils import json, try_encode, log_msg, log_exception, get_clean_image, KODI_VERSION
-    from utils import try_parse_int, localdate_from_utc_string, localized_date_time
-    from kodi_constants import *
+from .utils import json, try_encode, log_msg, log_exception, get_clean_image, KODI_VERSION
+from .utils import try_parse_int, localdate_from_utc_string, localized_date_time
+from .kodi_constants import *
 from operator import itemgetter
 import arrow
+import datetime
 
 
 class KodiDb(object):
     """various methods and helpers to get data from kodi json api"""
+
+    def __init__(self, simplecache=None):
+        '''Initialize - optionaly provide simplecache object'''
+        if not simplecache:
+            from simplecache import SimpleCache
+            self.cache = SimpleCache()
+        else:
+            self.cache = simplecache
 
     def movie(self, db_id):
         """get moviedetails from kodi db"""
@@ -37,10 +41,14 @@ class KodiDb(object):
         # apparently you can't filter on imdb so we have to do this the complicated way
         if KODI_VERSION > 16:
             # from Kodi 17 we have a uniqueid field instead of imdbnumber
-            all_items = self.get_json('VideoLibrary.GetMovies', fields=["uniqueid"], returntype="movies")
+            #all_items = self.get_json('VideoLibrary.GetMovies', fields=["uniqueid"], returntype="movies")
+            all_items = self.cache.get("kodidb.all_movies_uniqueids")
+            if not all_items:
+                all_items = self.get_json('VideoLibrary.GetMovies', fields=["uniqueid"], returntype="movies")
+                self.cache.set("kodidb.all_movies_uniqueids", all_items, expiration=datetime.timedelta(minutes=15))
             for item in all_items:
                 if 'uniqueid' in item:
-                    for item2 in item["uniqueid"].values():
+                    for item2 in list(item["uniqueid"].values()):
                         if item2 == imdb_id:
                             return self.movie(item["movieid"])
         else:
@@ -73,7 +81,7 @@ class KodiDb(object):
             all_items = self.get_json('VideoLibrary.GetTvShows', fields=["uniqueid"], returntype="tvshows")
             for item in all_items:
                 if 'uniqueid' in item:
-                    for item2 in item["uniqueid"].values():
+                    for item2 in list(item["uniqueid"].values()):
                         if item2 == imdb_id:
                             return self.tvshow(item["tvshowid"])
         else:
@@ -297,14 +305,9 @@ class KodiDb(object):
                 result = json_object['result'][returntype]
             else:
                 # no returntype specified, we'll have to look for it
-                if sys.version_info.major == 3:
-                    for key, value in json_object['result'].items():
-                        if not key == "limits" and (isinstance(value, list) or isinstance(value, dict)):
-                            result = value
-                else:
-                    for key, value in json_object['result'].iteritems():
-                        if not key == "limits" and (isinstance(value, list) or isinstance(value, dict)):
-                            result = value
+                for key, value in list(json_object['result'].items()):
+                    if not key == "limits" and (isinstance(value, list) or isinstance(value, dict)):
+                       result = value
         else:
             log_msg(json_response)
             log_msg(kodi_json)
@@ -378,12 +381,8 @@ class KodiDb(object):
                 nodetype = "Music"
 
             # extra properties
-            if sys.version_info.major == 3:
-                for key, value in item["extraproperties"].items():
-                    liz.setProperty(key, value)
-            else:
-                for key, value in item["extraproperties"].iteritems():
-                    liz.setProperty(key, value)
+            for key, value in list(item["extraproperties"].items()):
+                liz.setProperty(key, value)
 
             # video infolabels
             if nodetype == "Video":
@@ -566,7 +565,7 @@ class KodiDb(object):
             if "imdbnumber" not in properties and "imdbnumber" in item:
                 properties["imdbnumber"] = item["imdbnumber"]
             if "imdbnumber" not in properties and "uniqueid" in item:
-                for value in item["uniqueid"].values():
+                for value in list(item["uniqueid"].values()):
                     if value.startswith("tt"):
                         properties["imdbnumber"] = value
 
@@ -708,21 +707,21 @@ class KodiDb(object):
 
             # clean art
             if sys.version_info.major == 3:
-                for key, value in art.items():
+                for key, value in list(art.items()):
                     if not isinstance(value, str):
                         art[key] = ""
                     elif value:
                         art[key] = get_clean_image(value)
             else:
                 if sys.version_info.major == 3:
-                    for key, value in art.items():
+                    for key, value in list(art.items()):
                         if not isinstance(value, str):
                             art[key] = ""
                         elif value:
                             art[key] = get_clean_image(value)
                 else:
-                    for key, value in art.iteritems():
-                        if not isinstance(value, (str, unicode)):
+                    for key, value in list(art.items()):
+                        if not isinstance(value, (value, str)):
                             art[key] = ""
                         elif value:
                             art[key] = get_clean_image(value)

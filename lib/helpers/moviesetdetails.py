@@ -6,14 +6,9 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .kodi_constants import FIELDS_MOVIES
-    from .utils import get_duration, get_clean_image, extend_dict
-    from urllib.parse import quote_plus
-else:
-    from kodi_constants import FIELDS_MOVIES
-    from utils import get_duration, get_clean_image, extend_dict
-    from urllib import quote_plus
+from .kodi_constants import FIELDS_MOVIES
+from .utils import get_duration, get_clean_image, extend_dict
+from urllib.parse import quote_plus
 from operator import itemgetter
 import xbmc
 
@@ -37,7 +32,7 @@ def get_moviesetdetails(metadatautils, title, set_id):
         details = extend_dict(details, get_kodidb_setdata(metadatautils, set_id))
         if not details.get("plot"):
             details["plot"] = details["plots"]
-        details["extendedplot"] = details["titles"] + u"[CR]" + details["plot"]
+        details["extendedplot"] = details["titles"] + "[CR]" + details["plot"]
         all_fanarts = details["art"]["fanarts"]
         efa_path = "plugin://script.skin.helper.service/?action=extrafanart&fanarts=%s" % quote_plus(repr(all_fanarts))
         details["art"]["extrafanart"] = efa_path

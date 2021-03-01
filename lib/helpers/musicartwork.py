@@ -8,14 +8,10 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import log_msg, extend_dict, ADDON_ID, strip_newlines, download_artwork, try_decode, manual_set_artwork
-    from .mbrainz import MusicBrainz
-    from urllib.parse import quote_plus
-else:
-    from utils import log_msg, extend_dict, ADDON_ID, strip_newlines, download_artwork, try_decode, manual_set_artwork
-    from mbrainz import MusicBrainz
-    from urllib import quote_plus
+
+from .utils import log_msg, extend_dict, ADDON_ID, strip_newlines, download_artwork, try_decode, manual_set_artwork
+from .mbrainz import MusicBrainz
+from urllib.parse import quote_plus
 import xbmc
 import xbmcvfs
 import xbmcgui

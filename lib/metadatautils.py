@@ -11,11 +11,7 @@ import helpers.kodi_constants as kodi_constants
 from helpers.utils import log_msg, ADDON_ID
 from simplecache import use_cache, SimpleCache
 import xbmcvfs
-
-if sys.version_info.major == 3:
-    from urllib.parse import quote_plus
-else:
-    from urllib import quote_plus
+from urllib.parse import quote_plus
 
 
 class MetadataUtils(object):
@@ -224,7 +220,7 @@ class MetadataUtils(object):
             else:
                 return self._get_duration(duration)
         else:
-            if isinstance(duration, (str, unicode)) and ":" in duration:
+            if isinstance(duration, (str)) and ":" in duration:
                 dur_lst = duration.split(":")
                 return {
                     "Duration": "%s:%s" % (dur_lst[0], dur_lst[1]),
@@ -335,7 +331,7 @@ class MetadataUtils(object):
         '''public kodidb object - for lazy loading'''
         if not self._kodidb:
             from helpers.kodidb import KodiDb
-            self._kodidb = KodiDb()
+            self._kodidb = KodiDb(self.cache)
         return self._kodidb
 
     @property

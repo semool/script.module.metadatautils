@@ -7,10 +7,7 @@ import xbmcvfs
 import os, sys
 from datetime import timedelta
 from simplecache import use_cache
-if sys.version_info.major == 3:
-    from .utils import try_decode
-else:
-    from utils import try_decode
+from .utils import try_decode
 
 
 class StudioLogos():
@@ -39,7 +36,7 @@ class StudioLogos():
 
     def get_studio_logos(self, lookup_path):
         """get all studio logos"""
-        cache_str = u"SkinHelper.StudioLogos"
+        cache_str = "SkinHelper.StudioLogos"
         cache = self.cache.get(cache_str, checksum=lookup_path)
         if cache:
             return cache

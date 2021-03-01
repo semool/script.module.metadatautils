@@ -8,10 +8,7 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import get_json, KODI_LANGUAGE, try_parse_int, DialogSelect, get_compare_string, int_with_commas, ADDON_ID
-else:
-    from utils import get_json, KODI_LANGUAGE, try_parse_int, DialogSelect, get_compare_string, int_with_commas, ADDON_ID
+from .utils import get_json, KODI_LANGUAGE, try_parse_int, DialogSelect, get_compare_string, int_with_commas, ADDON_ID
 from difflib import SequenceMatcher as SM
 from simplecache import use_cache
 from operator import itemgetter
@@ -217,16 +214,16 @@ class Tmdb(object):
             rate_limit = ("themoviedb.org", 5)
             expiration = datetime.timedelta(days=60)
         if sys.version_info.major == 3:
-            cachestr = "tmdb.%s" % params.values()
+            cachestr = "tmdb.%s" % list(params.values())
         else:
-            cachestr = "tmdb.%s" % params.itervalues()
+            cachestr = "tmdb.%s" % iter(params.values())
         cache = self.cache.get(cachestr)
         if cache:
             # data obtained from cache
             result = cache
         else:
             # no cache, grab data from API
-            url = u'https://api.themoviedb.org/3/%s' % endpoint
+            url = 'https://api.themoviedb.org/3/%s' % endpoint
             result = get_json(url, params, ratelimit=rate_limit)
             # make sure that we have a plot value (if localized value fails, fallback to english)
             if result and "language" in params and "overview" in result:

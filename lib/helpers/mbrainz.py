@@ -8,10 +8,7 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import ADDON_ID, get_compare_string, log_msg
-else:
-    from utils import ADDON_ID, get_compare_string, log_msg
+from .utils import ADDON_ID, get_compare_string, log_msg
 from simplecache import use_cache
 import xbmcvfs
 import xbmcaddon

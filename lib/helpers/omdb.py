@@ -3,10 +3,7 @@
 
 """get metadata from omdb"""
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import get_json, get_xml, formatted_number, int_with_commas, try_parse_int, KODI_LANGUAGE, ADDON_ID
-else:
-    from utils import get_json, get_xml, formatted_number, int_with_commas, try_parse_int, KODI_LANGUAGE, ADDON_ID
+from .utils import get_json, get_xml, formatted_number, int_with_commas, try_parse_int, KODI_LANGUAGE, ADDON_ID
 from simplecache import use_cache
 import arrow
 import xbmc
@@ -73,7 +70,7 @@ class Omdb(object):
         """helper method to map the details received from omdb to kodi compatible format"""
         result = {}
         if sys.version_info.major == 3:
-            for key, value in data.items():
+            for key, value in list(data.items()):
                 # filter the N/A values
                 if value in ["N/A", "NA"] or not value:
                     continue
@@ -168,7 +165,7 @@ class Omdb(object):
                 elif key == "tomatoeURL":
                     result["rottentomatoes.url"] = value
         else:
-            for key, value in data.iteritems():
+            for key, value in list(data.items()):
                 # filter the N/A values
                 if value in ["N/A", "NA"] or not value:
                     continue

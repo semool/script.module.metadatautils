@@ -8,12 +8,10 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import requests, try_parse_int
-else:
-    from utils import requests, try_parse_int
+from .utils import requests, try_parse_int
 import bs4 as BeautifulSoup
 from simplecache import use_cache
+import xbmc
 
 
 class Imdb(object):
@@ -27,11 +25,8 @@ class Imdb(object):
         else:
             self.cache = simplecache
         if not kodidb:
-            if sys.version_info.major == 3:
-                from .kodidb import KodiDb
-            else:
-                from kodidb import KodiDb
-            self.kodidb = KodiDb()
+            from .kodidb import KodiDb
+            self.kodidb = KodiDb(self.cache)
         else:
             self.kodidb = kodidb
 
@@ -71,8 +66,11 @@ class Imdb(object):
         for imdb_id in results:
             kodi_movie = self.kodidb.movie_by_imdbid(imdb_id)
             if kodi_movie:
+                xbmc.log("script.module.metadatautils --> Check Imdb Top 250 for Movieid %s: %s" % (kodi_movie["movieid"], kodi_movie["originaltitle"]), level=xbmc.LOGINFO)
                 params = {
                     "movieid": kodi_movie["movieid"],
                     "top250": results[imdb_id]
                 }
-                self.kodidb.set_json('VideoLibrary.SetMovieDetails', params)
+                #self.kodidb.set_json('VideoLibrary.SetMovieDetails', params)
+                if not ("top250" in kodi_movie and kodi_movie["top250"] == results[imdb_id]):
+                    self.kodidb.set_json('VideoLibrary.SetMovieDetails', params)

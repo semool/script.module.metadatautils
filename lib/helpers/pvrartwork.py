@@ -8,12 +8,8 @@
 """
 
 import os, sys
-if sys.version_info.major == 3:
-    from .utils import get_clean_image, DialogSelect, log_msg, extend_dict, ADDON_ID, download_artwork, normalize_string
-    from urllib.parse import quote_plus
-else:
-    from utils import get_clean_image, DialogSelect, log_msg, extend_dict, ADDON_ID, download_artwork, normalize_string
-    from urllib import quote_plus
+from .utils import get_clean_image, DialogSelect, log_msg, extend_dict, ADDON_ID, download_artwork, normalize_string
+from urllib.parse import quote_plus
 import xbmc
 import xbmcgui
 import xbmcvfs
@@ -343,15 +339,9 @@ class PvrArtwork(object):
 
     def get_searchtitle(self, title, channel):
         """common logic to get a proper searchtitle from crappy titles provided by pvr"""
-        if sys.version_info.major < 3:
-            if not isinstance(title, unicode):
-                title = title.decode("utf-8")
         title = title.lower()
         # split characters - split on common splitters
-        if sys.version_info.major == 3:
-            splitters = self._mutils.addon.getSetting("pvr_art_splittitlechar").split("|")
-        else:
-            splitters = self._mutils.addon.getSetting("pvr_art_splittitlechar").decode("utf-8").split("|")
+        splitters = self._mutils.addon.getSetting("pvr_art_splittitlechar").split("|")
         if channel:
             splitters.append(" %s" % channel.lower())
         for splitchar in splitters:
@@ -544,11 +534,7 @@ class PvrArtwork(object):
                 details = kodi_items[0]
                 details["media_type"] = "movie"
         if details:
-            if sys.version_info.major == 3:
-                for artkey, artvalue in details["art"].items():
-                    details["art"][artkey] = get_clean_image(artvalue)
-            else:
-                for artkey, artvalue in details["art"].iteritems():
-                    details["art"][artkey] = get_clean_image(artvalue)
+            for artkey, artvalue in details["art"].items():
+               details["art"][artkey] = get_clean_image(artvalue)
             # todo: check extrafanart ?
         return details

@@ -13,12 +13,8 @@ import requests
 import arrow
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-if sys.version_info.major == 3:
-    import traceback
-    from urllib.parse import unquote
-else:
-    from traceback import format_exc
-    from urllib import unquote
+import traceback
+from urllib.parse import unquote
 import unicodedata
 import datetime
 import time
@@ -63,7 +59,7 @@ except Exception:
 def log_msg(msg, loglevel=xbmc.LOGDEBUG):
     """log message to kodi logfile"""
     if sys.version_info.major < 3:
-        if isinstance(msg, unicode):
+        if isinstance(msg, str):
             msg = msg.encode('utf-8')
     if loglevel == xbmc.LOGDEBUG and FORCE_DEBUG_LOG:
         loglevel = xbmc.LOGINFO
@@ -163,7 +159,7 @@ def get_xml(url, params=None, retries=0, ratelimit=None):
             if(len(tree)):
                 child = tree[0]
             #log_exception(__name__, child)
-            for attrName, attrValue in child.items():
+            for attrName, attrValue in list(child.items()):
                 result.update({attrName : attrValue})
         elif response.status_code in (429, 503, 504):
             raise Exception('Read timed out')
@@ -204,7 +200,7 @@ def try_decode(text, encoding="utf-8"):
 
 def urlencode(text):
     """helper to properly urlencode a string"""
-    blah = urllib.urlencode({'blahblahblah': try_encode(text)})
+    blah = urllib.parse.urlencode({'blahblahblah': try_encode(text)})
     blah = blah[13:]
     return blah
 
@@ -244,10 +240,7 @@ def process_method_on_list(method_to_run, items):
             except Exception:
                 log_msg(format_exc(sys.exc_info()))
             log_msg("Error while executing %s with %s" % (method_to_run, items))
-        if sys.version_info.major == 3:
-            all_items = list(filter(None, all_items))
-        else:
-            all_items = filter(None, all_items)
+        all_items = list(filter(None, all_items))
     return all_items
 
 
@@ -270,9 +263,6 @@ def get_clean_image(image):
             image = unquote(image.encode("utf-8"))
         if image.endswith("/"):
             image = image[:-1]
-    if sys.version_info.major < 3:
-        if not isinstance(image, unicode):
-            image = image.decode("utf8")
     return image
 
 
@@ -280,12 +270,8 @@ def get_duration(duration):
     """transform duration time in minutes to hours:minutes"""
     if not duration:
         return {}
-    if sys.version_info.major == 3:
-        if isinstance(duration, str):
-            duration.replace("min", "").replace("", "").replace(".", "")
-    else:
-        if isinstance(duration, (unicode, str)):
-            duration.replace("min", "").replace("", "").replace(".", "")
+    if isinstance(duration, str):
+       duration.replace("min", "").replace("", "").replace(".", "")
     try:
         total_minutes = int(duration)
         if total_minutes < 60:
@@ -515,7 +501,7 @@ def detect_plugin_content(plugin_path):
         content_type = "movies"
     # if we didn't get the content based on the path, we need to probe the addon...
     if not content_type and not xbmc.getCondVisibility("Window.IsMedia"):  # safety check
-        from kodidb import KodiDb
+        from .kodidb import KodiDb
         media_array = KodiDb().files(plugin_path, limits=(0, 1))
         for item in media_array:
             if item.get("filetype", "") == "directory":
@@ -578,7 +564,7 @@ def download_artwork(folderpath, artwork):
     if not xbmcvfs.exists(folderpath):
         xbmcvfs.mkdir(folderpath)
     if sys.version_info.major == 3:
-        for key, value in artwork.items():
+        for key, value in list(artwork.items()):
             if key == "fanart":
                 new_dict[key] = download_image(os.path.join(folderpath, "fanart.jpg"), value)
             elif key == "thumb":
@@ -638,7 +624,7 @@ def download_artwork(folderpath, artwork):
             else:
                 new_dict[key] = value
     else:
-        for key, value in artwork.iteritems():
+        for key, value in list(artwork.items()):
             if key == "fanart":
                 new_dict[key] = download_image(os.path.join(folderpath, "fanart.jpg"), value)
             elif key == "thumb":

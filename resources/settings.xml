@@ -21,7 +21,7 @@
     <category label="32015">
         <setting label="32016" type="lsep" />
         <setting label="32017" type="lsep" />
-        <setting id="music_art_scraper" type="bool" label="32018" default="true"/>
+        <setting id="music_art_scraper" type="bool" label="32018" default="false"/>
         <setting id="music_art_musicfolders" type="bool" label="32021" default="true"/>
         <setting id="music_art_custom" type="bool" label="32019" default="false"/>
         <setting id="music_art_custom_path" label="32020" type="folder" source="auto" default="" visible="eq(-1,true)"/>
